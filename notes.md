@@ -143,3 +143,35 @@ Post by title {{2 1 Test Post 1.2 This is the second test post.} {1 Joe Jones}}
 So far, so good. I can run two separate services using shared code and apply the concept of private and public methods.
 
 **COMMIT: FEAT: write runnable code that uses the modules**
+
+## Testing build
+
+I can build each service individually and get the expected results from each.
+
+```bash
+cd cmd/authorsSvc && go build 
+./authorsSvc
+cd ../..
+cd cmd/postsSvc && go build 
+./postsSvc
+cd ../..
+```
+
+I can also build from the project root individually and get executables in the project root.
+
+```bash
+go build authorsSvc
+go build postsSvc
+```
+
+But trying to build both at once produces no output. According to `go help build`:
+
+> When compiling multiple packages or a single non-main package, build compiles the packages but discards the resulting object, serving only as a check that the packages can be built.
+
+The help docs say `-o [destination]` will write output. `go build -o . authorsSvc postsSvc` gets two executables in the project root. They produce the same output as the tests above.
+
+I also did a quick test in `postsSvc` to ensure build fails if I try to call `authorRepo.add()`. See comments starting in line 71 of `cmd/postsSvc/main.go`.
+
+And I realized `.gitignore` is ignoring the `go.work` file, so I uncommented it. In theory, you'd exclude `go.work`, but it's needed in this repo for demonstration.
+
+**COMMIT: DOCS: explore and document how build works with workspaces**

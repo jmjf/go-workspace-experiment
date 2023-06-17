@@ -67,4 +67,11 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Post by title", pst)
+
+	// authorRepo.add(author.Author{})
+	//
+	// If I uncomment line 71, `go build postsSvc` fails with
+	// > cmd/postsSvc/main.go:71:13: authorRepo.add undefined (type author.AuthorRepo has no field or method add)
+	// This provides more proof the method is private
+
 }
