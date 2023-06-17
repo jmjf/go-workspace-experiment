@@ -50,7 +50,7 @@ go work use ./author ./post
 
 Now I have a workspace (`go.work`) in the project root and two modules (`author`, `post`).
 
-## Can I share strut definitions, data access code, functions?
+## Can I share struct definitions, data access code, functions?
 
 If the project was more complex, I'd have subdirectories in each module (`domain`, `repo`, `usecase`, etc.). This is a simple test application, so I'll put them in files (`authorDomain`, `authorRepo`, etc.).
 
