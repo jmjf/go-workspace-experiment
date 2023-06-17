@@ -16,7 +16,7 @@ type postUC struct {
 // if I change the repo implementation.
 // Overkill at this scale, but useful for the goals of the scenario I'm testing.
 type PostUC interface {
-	Add(authorId int, title string, body string) (repoPost, error)
+	Add(authorId int, title string, body string) (Post, error)
 	GetById(id int) (Post, error)
 	GetByTitle(title string) (Post, error)
 }
@@ -45,12 +45,16 @@ func (uc postUC) fillPost(post repoPost) (Post, error) {
 	return Post{post: post, author: author}, nil
 }
 
-func (uc postUC) Add(authorId int, title string, body string) (repoPost, error) {
-	if isValidTitle(title) {
-		return repoPost{}, fmt.Errorf("post title not valid |%s|", title)
+func (uc postUC) Add(authorId int, title string, body string) (Post, error) {
+	if !isValidTitle(title) {
+		return Post{}, fmt.Errorf("post title not valid |%s|", title)
 	}
 	// if post.Id < 1, repo will get the next id (max + 1), so pass 0
-	return uc.postRepo.Add(repoPost{0, authorId, title, body})
+	repoPost, err := uc.postRepo.Add(repoPost{0, authorId, title, body})
+	if err != nil {
+		return Post{}, err
+	}
+	return uc.fillPost(repoPost)
 }
 
 func (uc postUC) GetById(id int) (Post, error) {
@@ -68,7 +72,7 @@ func (uc postUC) GetById(id int) (Post, error) {
 }
 
 func (uc postUC) GetByTitle(title string) (Post, error) {
-	if isValidTitle(title) {
+	if !isValidTitle(title) {
 		return Post{}, fmt.Errorf("post title not valid |%s|", title)
 	}
 

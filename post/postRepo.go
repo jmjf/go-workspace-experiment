@@ -13,8 +13,12 @@ type PostRepo interface {
 	GetByTitle(title string) (repoPost, error)
 }
 
-func NewMemoryPostRepo(posts []repoPost) PostRepo {
-	return &memoryPostRepo{posts: posts}
+func NewMemoryPostRepo(posts []Post) PostRepo {
+	var repoPosts []repoPost
+	for _, post := range posts {
+		repoPosts = append(repoPosts, post.post)
+	}
+	return &memoryPostRepo{posts: repoPosts}
 }
 
 func (repo *memoryPostRepo) nextId() int {

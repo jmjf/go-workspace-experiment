@@ -41,19 +41,14 @@ Based on the LogRocket post, I need to run the following commands. (The informat
 
 ```bash
 go work init
-mkdir cmd && cd cmd
-mkdir authorsSvc && cd authorsSvc && go mod init authorsSvc
-cd ..
-mkdir postsSvc && cd postsSvc && go mod init postsSvc
-cd ../..
 mkdir author && cd author && go mod init author
 cd ..
 mkdir post && cd post && go mod init post
 cd ..
-go work use ./cmd/authorsSvc ./cmd/postsSvc ./author ./post
+go work use ./author ./post
 ```
 
-Now I have a workspace (`go.work`) in the project root and three modules (`cmd`, `author`, `post`).
+Now I have a workspace (`go.work`) in the project root and two modules (`author`, `post`).
 
 ## Can I share strut definitions, data access code, functions?
 
@@ -103,3 +98,48 @@ func NewPostUC(postRepo PostRepo, authorRepo author.AuthorRepo) (PostUC, error) 
 **Result:** Yes.
 
 **COMMIT: DOCS: explore and document how to share code between modules in a workspace**
+
+## Can I build separate executables?
+
+Let's build a couple of simple modules in `cmd`. In the real world, this might be separate REST APIs or message producers/consumers that are part of the bounded context. Here, I just want to setup an `AuthorUC` and a `PostUC` in separate apps, add a couple of items to the repos, and run a `GetById()`
+
+```bash
+mkdir cmd && cd cmd
+mkdir authorsSvc && cd authorsSvc && go mod init main
+cd ..
+mkdir postsSvc && cd postsSvc && go mod init main
+cd ../..
+go work use ./cmd/authorsSvc ./cmd/postsSvc
+```
+
+Now both services are set up in the workspace file.
+
+In `authorsSvc`, I build a `main()` function to perform some basic tests.
+
+`cd cmd/authorsSvc && go run main.go` gets the expected output. Note that the `go.mod` calls this module `authorsSvc` but `main.go` is `package main`.
+
+```
+New author {3 Mary Lamb}
+Author 1 {1 Joe Jones}
+Author 3 {3 Mary Lamb}
+```
+
+In `postsSvc`, I build a `main()` similar function. I found a few errors in the `post` module along the way and fixed them.
+
+* The use case `Add()` returned a `repoPost` instead of a `Post`.
+* The repo `New...()` accepted a `repoPost` instead of a `Post`.
+
+`cd cmd/postSvc && go run main.go` gets the expected output.
+
+```
+New post {{1 1 Test Post 1.1 This is the first test post.} {1 Joe Jones}}
+New post {{2 1 Test Post 1.2 This is the second test post.} {1 Joe Jones}}
+New post {{3 2 Test Post 2.1 This is the third test post.} {2 Sue Sutherland}}
+Post 1 {{1 1 Test Post 1.1 This is the first test post.} {1 Joe Jones}}
+Post 3 {{3 2 Test Post 2.1 This is the third test post.} {2 Sue Sutherland}}
+Post by title {{2 1 Test Post 1.2 This is the second test post.} {1 Joe Jones}}
+```
+
+So far, so good. I can run two separate services using shared code and apply the concept of private and public methods.
+
+**COMMIT: FEAT: write runnable code that uses the modules**
